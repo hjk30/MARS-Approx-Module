@@ -47,9 +47,6 @@ class LinearModel:
     DataTypes = {}
     '''Список-словарь типов данных для предикторов данных'''
     
-    TargetType = {}
-    '''Тип данных целевой переменной'''
-    
     def __init__(self, name, intercept=True, positive=False):
         '''Инициализатор экземпляра данного класса.'''
         
@@ -109,4 +106,4 @@ class LinearModel:
         [self.DataTypes.update({f'{X_train.keys()[i]}':
             dataTypes[i]}) for i in range(len(dataTypes))]
         
-        self.TargetType = {f'{Y.name}':Y.dtype}
+        self.DataTypes.update({f'{Y.name}':Y.dtype})
