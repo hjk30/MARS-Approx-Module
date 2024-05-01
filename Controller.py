@@ -74,14 +74,14 @@ def BtnCreateTable():
                         dpg.add_input_double(step=0, step_fast=0)
 
 dpg.create_context()
-imageWidth_bCreate, imageHeight_bCreate, imageChannels_bCreate, imageData_bCreate = dpg.load_image("table_create.png")
-imageWidth_bImport, imageHeight_bImport, imageChannels_bImport, imageData_bImport = dpg.load_image("import.png")
+imageWidth_bCreate, imageHeight_bCreate, imageChannels_bCreate, imageData_bCreate = dpg.load_image("icons/table_create.png")
+imageWidth_bImport, imageHeight_bImport, imageChannels_bImport, imageData_bImport = dpg.load_image("icons/import.png")
 #"https://www.flaticon.com/free-icons/import" Import icons created by surang - Flaticon</a>
-imageWidth_bSaveTable, imageHeight_bSaveTable, imageChannels_bSaveTable, imageData_bSaveTable = dpg.load_image("floppy-disk.png")
-imageWidth_bDraw, imageHeight_bDraw, imageChannels_bDraw, imageData_bDraw = dpg.load_image("CreateGraph.png")
-imageWidth_bApprox, imageHeight_bApprox, imageChannels_bApprox, imageData_bApprox = dpg.load_image("Approximator.png")
+imageWidth_bSaveTable, imageHeight_bSaveTable, imageChannels_bSaveTable, imageData_bSaveTable = dpg.load_image("icons/floppy-disk.png")
+imageWidth_bDraw, imageHeight_bDraw, imageChannels_bDraw, imageData_bDraw = dpg.load_image("icons/CreateGraph.png")
+imageWidth_bApprox, imageHeight_bApprox, imageChannels_bApprox, imageData_bApprox = dpg.load_image("icons/Approximator.png")
 #"https://www.flaticon.com/free-icons/save" Save icons created by tastyicon - Flaticon</a>
-imageWidth_bSaveGraph, imageHeight_bSaveGraph, imageChannels_bSaveGraph, imageData_bSaveGraph = dpg.load_image("SaveGraph.png")
+imageWidth_bSaveGraph, imageHeight_bSaveGraph, imageChannels_bSaveGraph, imageData_bSaveGraph = dpg.load_image("icons/SaveGraph.png")
 with dpg.texture_registry():
     dpg.add_static_texture(width=imageWidth_bCreate, height=imageHeight_bCreate, default_value=imageData_bCreate, tag="imageCreate")
     dpg.add_static_texture(width=imageWidth_bImport, height=imageHeight_bImport, default_value=imageData_bImport, tag="imageImport")
@@ -90,7 +90,7 @@ with dpg.texture_registry():
     dpg.add_static_texture(width=imageWidth_bApprox, height=imageHeight_bApprox, default_value=imageData_bApprox, tag="imageApprox")
     dpg.add_static_texture(width=imageWidth_bSaveGraph, height=imageHeight_bSaveGraph, default_value=imageData_bSaveGraph, tag="imageSaveGraph")
 with dpg.font_registry():
-    with dpg.font("notomono-regular.ttf", 20, default_font=True, tag="Default font") as f:
+    with dpg.font("fonts/notomono-regular.ttf", 20, default_font=True, tag="Default font") as f:
         dpg.add_font_range_hint(dpg.mvFontRangeHint_Cyrillic)
 
 dpg.bind_font("Default font")
