@@ -2,77 +2,59 @@ from sklearn import tree
 from sklearn import ensemble
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.metrics import mean_squared_error
+from .ModelBase import *
 
 
-class ModelBase():
-    _X_original = []
-    _Y_original = []
-    _X_new = []
-    _Y_new = []
-    _Predictor: object
+class TreeApprox(ModelsBase):
+    _model: tree.DecisionTreeRegressor
 
-    def __init__(self, X_original, Y_original):
-        self._X_original = X_original
-        self._Y_original = Y_original
+    model_type = 'Дерево решений'
 
-    def CalculateY(self, X_new):
-        self._X_new = X_new
-        self._Y_new = self._Predictor.predict(self._X_new)
-        return self._Y_new
+    def __init__(self, name):
+        super().__init__(name)
+
+    def Predict(self, X):
+        
+        try:
+            return self._model.predict(X)
+        except:
+            raise NotFittedError("Модель не обучена")
+
+    def TrainModel(self,X,Y,ratio,hyperparams):
+
+        self._model = tree.DecisionTreeRegressor(**hyperparams)
+        self._X_original, self._Y_original = X, Y
+        self._model.fit(X, Y)
+        
+        #predictors = X.keys().tolist()
+        #[self.PredictorNames.append(predictors[i]) for i in range(len(predictors))]
+        #self.TargetValueName = Y.name
+        
+        self._SetDataTypes(X,Y)
     
-    def CalculateError(self):
-        return mean_squared_error(self._Y_original, self._Predictor.predict(self._X_original))
+class RandomForestApprox(ModelsBase):
+    _model: ensemble.RandomForestRegressor
+    model_type = 'Случайный лес'
 
-class TreeApprox(ModelBase):
-    _Predictor: tree.DecisionTreeRegressor
+    def __init__(self, name):
+        super().__init__(name)
 
-    def __init__(self, X_original, Y_original):
-        ModelBase.__init__(self, X_original, Y_original)
-    
-    def CreateModel(self, hyperparams):
-        self._Predictor = tree.DecisionTreeRegressor(**hyperparams)
-        self._Predictor.fit(self._X_original, self._Y_original)
-    
-class RandomForestApprox(ModelBase):
-    _Predictor: ensemble.RandomForestRegressor
+    def Predict(self, X):
+        '''Производит предсказание целевой переменной по входным данным.
+        Входной массив должен иметь размерность, заданную предикторам при обучении.'''
+        
+        try:
+            return self._model.predict(X)
+        except:
+            raise NotFittedError("Модель не обучена")
 
-    def __init__(self, X_original, Y_original):
-        ModelBase.__init__(self, X_original, Y_original)
-    
-    def CreateModel(self, hyperparams):
-        self._Predictor = ensemble.RandomForestRegressor(**hyperparams)
-        self._Predictor.fit(self._X_original, self._Y_original)
-    
-def test():
-    # Create a random dataset
-    rng = np.random.RandomState(42)
-    X = np.sort(5 * rng.rand(80, 1), axis=0)
-    y = np.sin(X).ravel()
-    y[::5] += 3 * (0.5 - rng.rand(16))
+    def TrainModel(self,X,Y,ratio,hyperparams):
+        '''Производит обучение модели на входных данных.
+        Входные данные делятся на обучающую и тестовую выборки, после чего произходит обучение модели.
+        Метрики качества записываются в поле QualityMetrix.'''
 
-    # Fit regression model
-    regr_1 = TreeApprox(X, y)
-    regr_2 = RandomForestApprox(X, y)
-    regr_1.CreateModel({'max_depth': 5})
-    regr_2.CreateModel({'max_depth': 5})
-
-    # Predict
-    X_test = np.arange(0.0, 5.0, 0.01)[:, np.newaxis]
-    y_1 = regr_1.CalculateY(X_test)
-    y_2 = regr_2.CalculateY(X_test)
-
-    # Plot the results
-    plt.figure()
-    plt.scatter(X, y, s=20, edgecolor="black", c="darkorange", label="data")
-    plt.plot(X_test, y_1, color="cornflowerblue", label="max_depth=2", linewidth=2)
-    plt.plot(X_test, y_2, color="yellowgreen", label="max_depth=5", linewidth=2)
-    plt.xlabel("data")
-    plt.ylabel("target")
-    plt.title("Decision Tree Regression")
-    plt.legend()
-    plt.show()
-    print(regr_1.CalculateError())
-    print(regr_2.CalculateError())
-
-test()
+        self._model = ensemble.RandomForestRegressor(**hyperparams)
+        self._X_original, self._Y_original = X, Y
+        self._model.fit(X, Y)
+        
+        self._SetDataTypes(X,Y)
