@@ -4,24 +4,10 @@ from ApproximatorModules.ModelBase import ModelsBase
 
 class NewModelWindow:
     controller: object
-
+    xarr = []
+    yarr = []
     def __init__(self, controller):
         self.controller = controller
-
-    def file_select_callback(sender, app_data, user_data):
-        for key in app_data["selections"]:
-            file = open(app_data["selections"][key])
-            csv_data = list(csv.reader(file, delimiter=","))
-            file.close()
-            global xarr
-            global yarr
-            xarr = []
-            yarr = []
-            j = 0.0
-            for i in csv_data:
-                j+=1.0
-                xarr.append(j)
-                yarr.append(float(i[0]))
     
     current_model_type = "Полиноминальный"
     
@@ -30,22 +16,26 @@ class NewModelWindow:
         self.draw_hyperparams()
 
     def draw_hyperparams(self):
+        """
+        This function draws different input elements based on the current_model_type.
+        It handles cases for "Полиноминальный", "Линейная регрессия", "Случайный лес", and "Дерево решений".
+        """
         dpg.delete_item('hyperparams')
         with dpg.group(parent='hyperparams_group',tag='hyperparams'):
             match self.current_model_type:
                 case "Полиноминальный":
-                    with dpg.group(horizontal=True,pos=[150, 90]):
+                    with dpg.group(horizontal=True):
                         dpg.add_text("Степень:")
-                        dpg.add_input_int(width=100, step=0, step_fast=0,default_value=5, tag="poly_num", min_value=1)
+                        dpg.add_input_int(width=100, step=1, step_fast=1,default_value=5, tag="poly_num", min_value=1)
                 case "Линейная регрессия":
-                    with dpg.group(horizontal=True, pos=[150, 90]):
+                    with dpg.group(horizontal=True):
                         dpg.add_text("")
                 case "Случайный лес":
-                    with dpg.group(horizontal=True, pos=[150, 90]):
+                    with dpg.group(horizontal=True):
                         dpg.add_text('Максимальная глубина')
                         dpg.add_input_int(width=100, step=1, step_fast=3, tag='max_depth',default_value=5, min_value=1)
                 case "Дерево решений":
-                    with dpg.group(horizontal=True, pos=[150, 90]):
+                    with dpg.group(horizontal=True):
                         dpg.add_text('Максимальная глубина')
                         dpg.add_input_int(width=100, step=1, step_fast=3, tag='max_depth',default_value=5, min_value=1)
     def ok_callback(self):
@@ -59,39 +49,46 @@ class NewModelWindow:
                 model_type = 'Linear'
                 hyperparams = {}
             case "Случайный лес":
-                model_type = 'Tree'
-                hyperparams = {'max_depth': dpg.get_value('max_depth')}
-            case "Дерево решений":
                 model_type = 'RandomForest'
                 hyperparams = {'max_depth': dpg.get_value('max_depth')}
-        self.controller.add_tab(dpg.get_value('model_name'), model_type, hyperparams)
+            case "Дерево решений":
+                model_type = 'Tree'
+                hyperparams = {'max_depth': dpg.get_value('max_depth')}
+        self.controller.add_tab(dpg.get_value('model_name'), model_type, hyperparams,self.xarr,self.yarr)
         dpg.delete_item('New Model')
 
     def cancel_callback(sender):
         dpg.delete_item('New Model')
-    """
-    with dpg.file_dialog(directory_selector=True,show=False,tag="file_load_id", file_count=1, width=800 ,height=400):
-        dpg.add_file_extension(".*")
-         dpg.add_file_extension("", color=(150, 255, 150, 255))
-        dpg.add_file_extension("Source files (*.csv){.csv}", color=(0, 255, 255, 255))
-    file_data = []
-    file_data = 
-    """
+
+    def file_select_callback(self, sender, app_data, user_data):
+        for key in app_data["selections"]:
+            file = open(app_data["selections"][key])
+            csv_data = list(csv.reader(file, delimiter=","))
+            file.close()
+            for i in csv_data:
+                self.xarr.append(float(i[0]))
+                self.yarr.append(float(i[1]))
+
+    def openFile(self, sender, data):
+        if not dpg.does_item_exist('file_dialog_id'):
+            with dpg.file_dialog(directory_selector=False, show=False, callback=self.file_select_callback, file_count=1, id="file_dialog_id", width=800 ,height=400,min_size=[800, 400], max_size=[900, 600]):
+                dpg.add_file_extension("*.csv{.csv}")
+        dpg.show_item("file_dialog_id")
     def start(self):
         dpg.bind_font("Default font")
-        with dpg.window(label="New Model", tag='New Model', no_resize=True, no_move=False, no_collapse=True, width=500, height=400, no_close=True):
-            with dpg.group(horizontal=True, pos=[150, 25]):
+        with dpg.window(label="New Model", tag='New Model', no_resize=True, no_move=False, no_collapse=True, width=380, height=350, no_close=True):
+            with dpg.group(horizontal=True, pos=[20, 40]):
                 dpg.add_text("Имя:")
-                dpg.add_input_text(width=170, tag='model_name',default_value='Lorem ipsum')
-            with dpg.group(horizontal=True,pos=[150, 60]):
+                dpg.add_input_text(width=285, tag='model_name',default_value='Lorem ipsum')
+            with dpg.group(horizontal=True,pos=[20, 80]):
                 dpg.add_text("Тип модели:")
-                dpg.add_combo(items=["Полиноминальный", "Линейная регрессия", "Случайный лес", "Дерево решений"],default_value="Полиноминальный", width=200,callback=self.change_model_type)
-                with dpg.group(tag="hyperparams_group"):
+                dpg.add_combo(items=["Полиноминальный", "Линейная регрессия", "Случайный лес", "Дерево решений"],default_value="Полиноминальный", width=215,callback=self.change_model_type)
+                with dpg.group(tag="hyperparams_group", pos=[20, 120]):
                     dpg.add_group(tag="hyperparams")
                     self.draw_hyperparams()
-            dpg.add_button(label="OK", width=50, height=25, pos=[300, 290], callback=self.ok_callback)
-            dpg.add_button(label="Cancel", width=75, height=25, pos=[360, 290], callback=self.cancel_callback)
-            #dpg.add_button(label="Load file", width=150, height=50, pos=[20,290], dpg.show_item("file_load_id"))       
+            dpg.add_button(label="OK", width=50, height=25, pos=[225, 310], callback=self.ok_callback)
+            dpg.add_button(label="Cancel", width=75, height=25, pos=[285, 310], callback=self.cancel_callback)
+            dpg.add_button(label="Load file", width=150, height=25, pos=[20,310], callback=self.openFile)       
 
 
 class MainGraphWindow:
@@ -102,7 +99,6 @@ class MainGraphWindow:
     def __init__(self):
         self.next_tab_id = 0
         self.current_tab_id = 0
-        print("init")
 
     def show_file_dialog(self, sender, object):
         dpg.add_file_dialog()
@@ -113,7 +109,6 @@ class MainGraphWindow:
     def add_model_tab(self, object):
         new_model_window = NewModelWindow(self.controller)
         new_model_window.start()
-        #self.controller.add_tab('Model' + str(self.next_tab_id), 'Poly', {'NumberPoly': 5})
 
     def start(self, controller):
         self.controller = controller
@@ -124,11 +119,7 @@ class MainGraphWindow:
                 dpg.add_font_range_hint(dpg.mvFontRangeHint_Cyrillic)
 
         dpg.bind_font("Default font")
-
-        with dpg.file_dialog(directory_selector=False, show=False, file_count=1, id="file_dialog_id", width=800 ,height=400):
-            dpg.add_file_extension(".*")
-            dpg.add_file_extension("", color=(150, 255, 150, 255))
-            dpg.add_file_extension("Source files (*.csv){.csv}", color=(0, 255, 255, 255))
+        
         with dpg.window(tag="Primary Window"):
             with dpg.tab_bar(tag ="Tab_bar",callback=self.tab_changed):
                 dpg.add_tab_button(label="+", callback=self.add_model_tab)
@@ -143,6 +134,12 @@ class MainGraphWindow:
                 dpg.add_theme_color(dpg.mvThemeCol_FrameBg, (180, 180, 180))
                 dpg.add_theme_color(dpg.mvThemeCol_PopupBg, (255, 255, 255))
                 dpg.add_theme_color(dpg.mvThemeCol_Header, (180,180,180))
+                dpg.add_theme_color(dpg.mvThemeCol_TableRowBg, (255,255,255))
+                dpg.add_theme_color(dpg.mvThemeCol_TableRowBgAlt, (230, 230, 230))
+                dpg.add_theme_color(dpg.mvThemeCol_TableHeaderBg, (230, 230, 230))
+                dpg.add_theme_color(dpg.mvThemeCol_ScrollbarBg, (230, 230, 230))
+                dpg.add_theme_color(dpg.mvThemeCol_ChildBg, (200, 200, 200))
+
 
         dpg.bind_theme(container_theme)
         dpg.create_viewport(title='Le Module', width=1208, height=700, resizable=False)
@@ -162,7 +159,6 @@ class MainGraphWindow:
             self.current_tab_id = dpg.add_tab(label=current_model.name, parent='Tab_bar', tag="Tab" + str(self.next_tab_id))
         else:
             dpg.add_tab(label=current_model.name, parent='Tab_bar', tag="Tab" + str(self.next_tab_id))
-        #dpg.delete_item("Tab" + str(len(self.models) - 1))
         with dpg.group(parent="Tab" + str(self.next_tab_id)):
             with dpg.plot(tag="Graph" + str(self.next_tab_id), width=799, height=598, pos=(9, 39)):
                 dpg.add_plot_axis(dpg.mvXAxis, label="X")
@@ -171,13 +167,12 @@ class MainGraphWindow:
                 dpg.add_line_series(poly_xarr, poly_yarr, parent="y_axis" + str(self.next_tab_id))
             with dpg.group(horizontal=True, pos=[825,50], before= "drawlist" + str(self.next_tab_id)):
                 dpg.add_text("Название:")
-                dpg.add_input_text(width=150, default_value=current_model.name)
+                dpg.add_input_text(width=150, default_value=current_model.name, readonly=True)
                 dpg.add_button(label="Сохранить", width=100)
             with dpg.group(horizontal=True, pos=[825,85], before= "drawlist" + str(self.next_tab_id)):
                 dpg.add_text("Метод:")
                 dpg.add_text(current_model.model_type)
-                dpg.add_button(label="Удалить модель", width=150, callback=self.delete_tab)
-                #dpg.add_button(label="Выбрать данные", width=120, callback=self.show_file_dialog)
+                dpg.add_button(label="Удалить", pos=[1080,85], width=100, callback=self.delete_tab)
             with dpg.group(horizontal=False, pos=[825,120],before= "drawlist" + str(self.next_tab_id)):
                 dpg.add_text("Метрики:")
                 with dpg.group(horizontal=True,before= "drawlist" + str(self.next_tab_id)):
@@ -193,10 +188,10 @@ class MainGraphWindow:
 
             with dpg.group(horizontal=True, pos=[825,440], before="drawlist" + str(self.next_tab_id)):
                 dpg.add_text("Толщина точек:")
-                dpg.add_combo(items=["0,5 pt", "1 pt", "2 pt", "4 pt", "6 pt"], default_value="1 pt", width=80)
+                dpg.add_combo(items=["0,5 pt", "1 pt", "2 pt", "4 pt", "6 pt"], default_value="4 pt", width=80)
             with dpg.group(horizontal=True, pos=[825,475], before="drawlist" + str(self.next_tab_id)):
                 dpg.add_text("Цвет точек:")
-                dpg.add_color_edit(default_value=[0, 0, 0], no_inputs=True)
+                dpg.add_color_edit(default_value=[76, 114, 176], no_inputs=True)
             with dpg.group(horizontal=True, pos=[825,530], before="drawlist" + str(self.next_tab_id)):
                 dpg.add_text("Вид линии:")
                 dpg.add_combo(items=["Непрервыная", "Пунктирная"], width=150, default_value="Непрервыная")
@@ -205,4 +200,4 @@ class MainGraphWindow:
                 dpg.add_combo(items=["0.5 pt", "1 pt", "2 pt", "4 pt", "6 pt"], default_value="1 pt", width=80)
             with dpg.group(horizontal=True, pos=[825,600], before="drawlist" + str(self.next_tab_id)):
                 dpg.add_text("Цвет соединения:")
-                dpg.add_color_edit(default_value=[0, 0, 0], no_inputs=True)
+                dpg.add_color_edit(default_value=[221, 132, 82], no_inputs=True)
