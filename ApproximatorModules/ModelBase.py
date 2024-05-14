@@ -64,6 +64,14 @@ class ModelsBase():
         R2M = np.round(metrics.r2_score(Y_test,Test_prediction),2)
         R2M = {'Метрика R^2' : R2M}
         self.QualityMetrix.update(R2M)
+
+        mean_absolute = np.round(metrics.mean_absolute_error(Y_test,Test_prediction),2)
+        mean_absolute = {'Метрика средней абсолютной ошибки' : mean_absolute}
+        self.QualityMetrix.update(mean_absolute)
+
+        max_error = np.round(metrics.max_error(Y_test,Test_prediction),2)
+        max_error = {'Метрика максимальной ошибки' : max_error}
+        self.QualityMetrix.update(max_error)
         
     def _SetDataTypes(self,X,Y):
         '''Производит формирование словаря типов данных предикторов и

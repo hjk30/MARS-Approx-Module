@@ -33,7 +33,6 @@ class Controller:
 			writer = csv.writer(f)
 			for i in range(len(xarr)):
 				writer.writerow([xarr[i], yarr[i]])
-	#def add_tab(self,xarr,yarr,name,model_type,hyperparams):
 	def add_tab(self,name,model_type,hyperparams,xarr:list,yarr:list):
 		if (xarr == []):
 			for i in range(100):
